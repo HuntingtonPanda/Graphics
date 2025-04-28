@@ -214,36 +214,61 @@ const translationYup = translationMatrix(0, 1.5*l, 0); // Translate l units in t
 const translationYdown = translationMatrix(0, 1.5*-l, 0); // Translate -l units in the y direction
 const translationXup = translationMatrix(l, 0, 0); // Translate l units in the x direction
 const translationXdown = translationMatrix(-l, 0, 0); // Translate -l units in the x direction
-const rotation = rotationMatrixZ(Math.PI/18); // Rotate 10 degrees around the z-axis(10 degrees = PI/18 radians)
+//const rotation = rotationMatrixZ(Math.PI/18); // Rotate 10 degrees around the z-axis(10 degrees = PI/18 radians)
 
 //Scale the cubes
 const scaling = scalingMatrix(1, 1.5, 1); // Scale the cube by a factor of 1.5 in the y direction
 
-let model_transformation = new THREE.Matrix4(); // model transformation matrix we will update
-model_transformation.multiplyMatrices(scaling, model_transformation);
-for (let i = 0; i < cubes.length; i++) {
-	cubes[i].matrix.copy(model_transformation);
-    //For rotation in respect of the last cube
-    model_transformation.multiplyMatrices(translationYup, model_transformation);
-    model_transformation.multiplyMatrices(translationXup, model_transformation);
-    model_transformation.multiplyMatrices(rotation, model_transformation);
-    model_transformation.multiplyMatrices(translationYdown, model_transformation);
-    model_transformation.multiplyMatrices(translationXdown, model_transformation);
+// let model_transformation = new THREE.Matrix4(); // model transformation matrix we will update
+// model_transformation.multiplyMatrices(scaling, model_transformation);
+// for (let i = 0; i < cubes.length; i++) {
+// 	cubes[i].matrix.copy(model_transformation);
+//     //For rotation in respect of the last cube
+//     model_transformation.multiplyMatrices(translationYup, model_transformation);
+//     model_transformation.multiplyMatrices(translationXup, model_transformation);
+//     model_transformation.multiplyMatrices(rotation, model_transformation);
+//     model_transformation.multiplyMatrices(translationYdown, model_transformation);
+//     model_transformation.multiplyMatrices(translationXdown, model_transformation);
     
-    //For translation in respect of the last cube
-    model_transformation.multiplyMatrices(translation, model_transformation);
-}
+//     //For translation in respect of the last cube
+//     model_transformation.multiplyMatrices(translation, model_transformation);
+// }
 
 // TODO: Transform cubes
+let animation_time = 0;
+let delta_animation_time;
+let rotation_angle;
+const clock = new THREE.Clock();
 
+const MAX_ANGLE = 10 * 2*Math.PI/360 // 10 degrees converted to radians
+const T = 3 // oscilation persiod in seconds
 
 function animate() {
     
 	renderer.render( scene, camera );
     controls.update();
 
-    // TODO
-    // Animate the cube
+    delta_animation_time = clock.getDelta();
+    animation_time += delta_animation_time; 
+    // ...
+    // feel free to add other auxiliary variables if needed.
+    rotation_angle = MAX_ANGLE * Math.abs(Math.sin(2 * Math.PI * animation_time / (2*T)));
+
+    const rotation = rotationMatrixZ(rotation_angle);
+    let model_transformation = new THREE.Matrix4(); // model transformation matrix we will update
+    model_transformation.multiplyMatrices(scaling, model_transformation);
+    for (let i = 0; i < cubes.length; i++) {
+      cubes[i].matrix.copy(model_transformation);
+        //For rotation in respect of the last cube
+        model_transformation.multiplyMatrices(translationYup, model_transformation);
+        model_transformation.multiplyMatrices(translationXup, model_transformation);
+        model_transformation.multiplyMatrices(rotation, model_transformation);
+        model_transformation.multiplyMatrices(translationYdown, model_transformation);
+        model_transformation.multiplyMatrices(translationXdown, model_transformation);
+        
+        //For translation in respect of the last cube
+        model_transformation.multiplyMatrices(translation, model_transformation);
+    }
 
 }
 renderer.setAnimationLoop( animate );
